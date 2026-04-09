@@ -128,9 +128,10 @@
 
   .tiki-card {
     @apply rounded-2xl p-6;
-    background: hsl(var(--card));
-    border: 3px solid hsl(var(--tiki-wood-light));
+    background: hsl(var(--card) / 0.92);
+    border: 3px solid hsl(var(--tiki-wood-light) / 0.6);
     box-shadow: var(--shadow-tiki);
+    backdrop-filter: blur(8px);
   }
 
   .tiki-token {

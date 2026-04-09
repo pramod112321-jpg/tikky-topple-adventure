@@ -27,8 +27,8 @@ export function HomeScreen({ onPlay, onRules }: HomeScreenProps) {
         />
 
         {/* Title */}
-        <h1 className="tiki-title text-6xl md:text-7xl mb-2 text-center">Tiki Topple</h1>
-        <p className="text-muted-foreground text-lg md:text-xl mb-10 text-center font-body font-semibold">
+        <h1 className="tiki-title text-6xl md:text-7xl mb-2 text-center" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}>Tiki Topple</h1>
+        <p className="text-lg md:text-xl mb-10 text-center font-body font-semibold" style={{ color: 'hsl(40, 60%, 90%)' }}>
           The Strategic Stacking Game 🏝️
         </p>
 
@@ -43,7 +43,7 @@ export function HomeScreen({ onPlay, onRules }: HomeScreenProps) {
         </div>
 
         {/* Credits */}
-        <p className="text-xs text-muted-foreground mt-10 text-center">
+        <p className="text-xs mt-10 text-center" style={{ color: 'hsl(40, 40%, 80%)' }}>
           NPC Board2Code Hackathon 2026 • LPU
         </p>
       </div>
