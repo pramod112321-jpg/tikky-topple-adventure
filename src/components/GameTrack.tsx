@@ -7,31 +7,39 @@ interface GameTrackProps {
 
 export function GameTrack({ state }: GameTrackProps) {
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex gap-2 items-end min-w-fit p-4">
-        {state.track.map((tokensAtPos, posIndex) => (
-          <div key={posIndex} className="flex flex-col items-center gap-1">
-            {/* Stacked tokens */}
-            <div className="flex flex-col-reverse gap-1 min-h-[60px]">
-              {tokensAtPos.map((tokenId, stackIdx) => (
-                <TikiToken
-                  key={tokenId}
-                  token={state.tokens[tokenId]}
-                  size="sm"
-                  index={stackIdx}
-                />
-              ))}
+    <div className="w-full overflow-x-auto pb-2">
+      <div className="flex gap-1.5 items-end min-w-fit px-2">
+        {state.track.map((tokensAtPos, posIndex) => {
+          const isFinish = posIndex === state.trackLength - 1;
+          const hasTokens = tokensAtPos.length > 0;
+          return (
+            <div key={posIndex} className="flex flex-col items-center gap-1.5">
+              {/* Stacked tokens at this position */}
+              <div className="flex flex-col gap-1 min-h-[48px] justify-end">
+                {[...tokensAtPos].reverse().map((tokenId, stackIdx) => (
+                  <TikiToken
+                    key={tokenId}
+                    token={state.tokens[tokenId]}
+                    size="sm"
+                    index={stackIdx}
+                  />
+                ))}
+              </div>
+              {/* Track cell label */}
+              <div
+                className={`w-12 h-7 rounded-md flex items-center justify-center text-xs font-bold transition-all duration-200 border-2 ${
+                  isFinish
+                    ? 'bg-secondary/40 border-secondary text-secondary-foreground'
+                    : hasTokens
+                    ? 'bg-primary/10 border-primary/30 text-foreground'
+                    : 'bg-muted/60 border-border text-muted-foreground'
+                }`}
+              >
+                {isFinish ? '🏁' : posIndex}
+              </div>
             </div>
-            {/* Track cell */}
-            <div
-              className={`tiki-track-cell w-12 h-8 flex items-center justify-center text-xs font-bold text-muted-foreground ${
-                tokensAtPos.length > 0 ? 'tiki-track-cell-active' : ''
-              } ${posIndex === state.trackLength - 1 ? 'bg-secondary/30 border-secondary' : ''}`}
-            >
-              {posIndex === state.trackLength - 1 ? '🏁' : posIndex}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
