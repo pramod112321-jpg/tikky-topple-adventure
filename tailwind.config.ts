@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['Lilita One', 'cursive'],
+        body: ['Nunito', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,6 +51,20 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        tiki: {
+          orange: "hsl(var(--tiki-orange))",
+          yellow: "hsl(var(--tiki-yellow))",
+          green: "hsl(var(--tiki-green))",
+          blue: "hsl(var(--tiki-blue))",
+          red: "hsl(var(--tiki-red))",
+          purple: "hsl(var(--tiki-purple))",
+          pink: "hsl(var(--tiki-pink))",
+          teal: "hsl(var(--tiki-teal))",
+          wood: "hsl(var(--tiki-wood))",
+          "wood-light": "hsl(var(--tiki-wood-light))",
+          sand: "hsl(var(--tiki-sand))",
+          track: "hsl(var(--tiki-track))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -65,20 +83,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
