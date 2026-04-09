@@ -6,27 +6,37 @@ interface TikiTokenProps {
   selected?: boolean;
   onClick?: () => void;
   index?: number;
+  orderNumber?: number;
 }
 
 const sizeClasses = {
-  sm: 'w-10 h-10 text-sm',
-  md: 'w-14 h-14 text-lg',
-  lg: 'w-16 h-16 text-xl',
+  sm: 'w-11 h-11 text-base',
+  md: 'w-14 h-14 text-xl',
+  lg: 'w-16 h-16 text-2xl',
 };
 
-export function TikiToken({ token, size = 'md', selected, onClick, index }: TikiTokenProps) {
+export function TikiToken({ token, size = 'md', selected, onClick, index, orderNumber }: TikiTokenProps) {
   return (
-    <button
-      onClick={onClick}
-      disabled={!onClick}
-      className={`tiki-token ${sizeClasses[size]} ${selected ? 'ring-4 ring-secondary scale-110' : ''} ${onClick ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
-      style={{
-        backgroundColor: token.color,
-        animationDelay: index ? `${index * 0.05}s` : '0s',
-      }}
-      title={`${token.label} (Player ${token.ownerId + 1})`}
-    >
-      <span className="drop-shadow-md">{token.label}</span>
-    </button>
+    <div className="relative">
+      <button
+        onClick={onClick}
+        disabled={!onClick}
+        className={`tiki-token ${sizeClasses[size]} ${
+          selected ? 'ring-4 ring-secondary scale-110 z-10' : ''
+        } ${onClick ? 'cursor-pointer hover:scale-110 hover:z-10' : 'cursor-default'}`}
+        style={{
+          backgroundColor: token.color,
+          animationDelay: index ? `${index * 0.05}s` : '0s',
+        }}
+        title={`${token.emoji} ${token.label} (P${token.ownerId + 1})`}
+      >
+        <span className="drop-shadow-md">{token.emoji}</span>
+      </button>
+      {orderNumber !== undefined && (
+        <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow-md z-20">
+          {orderNumber}
+        </span>
+      )}
+    </div>
   );
 }

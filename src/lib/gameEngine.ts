@@ -1,51 +1,51 @@
-import { GameState, Token, Player, GameAction, TOKEN_COLORS, PLAYER_NAMES } from './gameTypes';
+import { GameState, Token, Player, GameAction, TOKEN_CONFIGS, PLAYER_COLORS } from './gameTypes';
 
-export function createGame(playerCount: number): GameState {
+export function createGame(playerNames: string[]): GameState {
+  const playerCount = playerNames.length;
   const tokensPerPlayer = 2;
-  const totalTokens = playerCount * tokensPerPlayer;
-  const trackLength = 10;
-  const maxTurns = 25;
+  const trackLength = 12;
+  const maxTurns = 30;
 
   const tokens: Record<string, Token> = {};
   const players: Player[] = [];
-  const stack: string[] = [];
+  const allTokenIds: string[] = [];
 
-  // Create players and tokens
   for (let p = 0; p < playerCount; p++) {
     const playerTokenIds: string[] = [];
     for (let t = 0; t < tokensPerPlayer; t++) {
       const colorIndex = p * tokensPerPlayer + t;
-      const tokenId = `token-${p}-${t}`;
+      const config = TOKEN_CONFIGS[colorIndex % TOKEN_CONFIGS.length];
+      const tokenId = `t-${p}-${t}`;
       tokens[tokenId] = {
         id: tokenId,
-        color: TOKEN_COLORS[colorIndex % TOKEN_COLORS.length].color,
-        label: TOKEN_COLORS[colorIndex % TOKEN_COLORS.length].label,
+        color: config.color,
+        label: config.label,
+        emoji: config.emoji,
         ownerId: p,
       };
       playerTokenIds.push(tokenId);
-      stack.push(tokenId);
+      allTokenIds.push(tokenId);
     }
     players.push({
       id: p,
-      name: PLAYER_NAMES[p],
+      name: playerNames[p] || `Player ${p + 1}`,
       tokenIds: playerTokenIds,
       score: 0,
+      color: PLAYER_COLORS[p % PLAYER_COLORS.length],
     });
   }
 
-  // Shuffle stack
-  for (let i = stack.length - 1; i > 0; i--) {
+  // Shuffle all tokens
+  for (let i = allTokenIds.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [stack[i], stack[j]] = [stack[j], stack[i]];
+    [allTokenIds[i], allTokenIds[j]] = [allTokenIds[j], allTokenIds[i]];
   }
 
-  // Initialize track - all tokens start at position 0
   const track: string[][] = Array.from({ length: trackLength }, () => []);
-  track[0] = [...stack];
+  track[0] = [...allTokenIds]; // all start at position 0
 
   return {
     players,
-    stack, // this represents the order at current position (top to bottom)
     track,
     trackLength,
     currentPlayerIndex: 0,
@@ -54,11 +54,12 @@ export function createGame(playerCount: number): GameState {
     phase: 'playing',
     tokens,
     lastAction: null,
+    history: [],
   };
 }
 
-export function getStackAtPosition(state: GameState): { position: number; tokens: string[] } | null {
-  // Find the rearmost position that has tokens (main stack)
+// Find the furthest-back (leftmost) position that has tokens
+export function getMainStack(state: GameState): { position: number; tokens: string[] } | null {
   for (let i = 0; i < state.trackLength; i++) {
     if (state.track[i].length > 0) {
       return { position: i, tokens: state.track[i] };
@@ -67,51 +68,58 @@ export function getStackAtPosition(state: GameState): { position: number; tokens
   return null;
 }
 
+// Get all positions that have tokens
+export function getOccupiedPositions(state: GameState): { position: number; tokens: string[] }[] {
+  const result: { position: number; tokens: string[] }[] = [];
+  for (let i = 0; i < state.trackLength; i++) {
+    if (state.track[i].length > 0) {
+      result.push({ position: i, tokens: state.track[i] });
+    }
+  }
+  return result;
+}
+
 export function executeAction(state: GameState, action: GameAction): GameState {
-  const newState = JSON.parse(JSON.stringify(state)) as GameState;
+  const newState: GameState = JSON.parse(JSON.stringify(state));
+  const playerName = newState.players[newState.currentPlayerIndex].name;
 
   if (action.type === 'move') {
-    // Find the rearmost stack with tokens
-    const stackInfo = getStackAtPosition(newState);
-    if (!stackInfo) return newState;
+    // Find the rearmost position with tokens
+    const mainStack = getMainStack(newState);
+    if (!mainStack) return newState;
 
-    const { position, tokens: currentStack } = stackInfo;
+    const { position, tokens: currentTokens } = mainStack;
     const nextPos = position + 1;
     if (nextPos >= newState.trackLength) return newState;
 
-    // Take top N tokens (maintaining order) and move them forward
-    const count = Math.min(action.count, currentStack.length);
-    const movedTokens = currentStack.splice(0, count);
+    const count = Math.min(action.count, currentTokens.length);
+    const movedTokens = currentTokens.splice(0, count);
 
-    // Place them at next position, on top of any existing tokens there
+    // Place at next position on top of existing
     newState.track[nextPos] = [...movedTokens, ...newState.track[nextPos]];
-    
-    newState.lastAction = `${newState.players[newState.currentPlayerIndex].name} moved ${count} token${count > 1 ? 's' : ''} forward`;
+
+    const msg = `${playerName} moved ${count} token${count > 1 ? 's' : ''} forward`;
+    newState.lastAction = msg;
+    newState.history.push(msg);
 
   } else if (action.type === 'reorder') {
-    // Find the rearmost stack
-    const stackInfo = getStackAtPosition(newState);
-    if (!stackInfo) return newState;
+    // Find the rearmost position with tokens
+    const mainStack = getMainStack(newState);
+    if (!mainStack) return newState;
 
-    const { tokens: currentStack } = stackInfo;
-    const count = Math.min(action.count, currentStack.length);
+    const { position } = mainStack;
+    const currentTokens = newState.track[position];
+    const count = Math.min(action.count, currentTokens.length);
 
     // Remove top N tokens
-    currentStack.splice(0, count);
-
-    // Insert new order at top
+    currentTokens.splice(0, count);
+    // Insert in new order at top
     const reordered = action.newOrder.slice(0, count);
-    stackInfo.tokens.unshift(...reordered);
+    newState.track[position] = [...reordered, ...currentTokens];
 
-    // Update the track
-    for (let i = 0; i < newState.trackLength; i++) {
-      if (newState.track[i].length > 0) {
-        newState.track[i] = stackInfo.tokens;
-        break;
-      }
-    }
-
-    newState.lastAction = `${newState.players[newState.currentPlayerIndex].name} reordered top ${count} tokens`;
+    const msg = `${playerName} reordered top ${count} tokens`;
+    newState.lastAction = msg;
+    newState.history.push(msg);
   }
 
   // Advance turn
@@ -121,10 +129,7 @@ export function executeAction(state: GameState, action: GameAction): GameState {
   }
 
   // Check end conditions
-  const allAtEnd = newState.track[newState.trackLength - 1].length > 0 &&
-    newState.track.slice(0, newState.trackLength - 1).every(pos => pos.length === 0);
-  
-  if (allAtEnd || newState.turnNumber > newState.maxTurns) {
+  if (checkGameEnd(newState)) {
     newState.phase = 'ended';
     calculateScores(newState);
   }
@@ -132,32 +137,49 @@ export function executeAction(state: GameState, action: GameAction): GameState {
   return newState;
 }
 
-function calculateScores(state: GameState): void {
-  // Score based on position - tokens further along get more points
-  // Also, within a position, tokens higher in stack get more points
+function checkGameEnd(state: GameState): boolean {
+  // All tokens at final position
+  const lastPos = state.track[state.trackLength - 1];
   const totalTokens = Object.keys(state.tokens).length;
-  let rank = totalTokens;
+  if (lastPos.length === totalTokens) return true;
 
-  // From end to start
+  // Exceeded max turns
+  if (state.turnNumber > state.maxTurns) return true;
+
+  return false;
+}
+
+function calculateScores(state: GameState): void {
+  // Reset scores
+  state.players.forEach(p => p.score = 0);
+
+  const totalTokens = Object.keys(state.tokens).length;
+  let rank = totalTokens; // highest rank = most points
+
+  // From furthest position to nearest, top of stack first
   for (let pos = state.trackLength - 1; pos >= 0; pos--) {
-    const tokensAtPos = state.track[pos];
-    for (const tokenId of tokensAtPos) {
+    for (const tokenId of state.track[pos]) {
       const token = state.tokens[tokenId];
-      const player = state.players[token.ownerId];
-      player.score += rank;
+      state.players[token.ownerId].score += rank;
       rank--;
     }
   }
 }
 
 export function canMove(state: GameState): boolean {
-  const stackInfo = getStackAtPosition(state);
-  if (!stackInfo) return false;
-  return stackInfo.position + 1 < state.trackLength;
+  const stack = getMainStack(state);
+  if (!stack) return false;
+  return stack.position + 1 < state.trackLength;
 }
 
 export function canReorder(state: GameState): boolean {
-  const stackInfo = getStackAtPosition(state);
-  if (!stackInfo) return false;
-  return stackInfo.tokens.length >= 2;
+  const stack = getMainStack(state);
+  if (!stack) return false;
+  return stack.tokens.length >= 2;
+}
+
+export function getMaxMovable(state: GameState): number {
+  const stack = getMainStack(state);
+  if (!stack) return 0;
+  return Math.min(3, stack.tokens.length);
 }

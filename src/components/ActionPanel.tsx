@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GameState, GameAction } from '@/lib/gameTypes';
-import { canMove, canReorder, getStackAtPosition } from '@/lib/gameEngine';
+import { canMove, canReorder, getMainStack, getMaxMovable } from '@/lib/gameEngine';
 import { TikiToken } from './TikiToken';
 
 interface ActionPanelProps {
@@ -9,13 +9,14 @@ interface ActionPanelProps {
 }
 
 export function ActionPanel({ state, onAction }: ActionPanelProps) {
-  const [mode, setMode] = useState<'choose' | 'move' | 'reorder'>('choose');
+  const [mode, setMode] = useState<'choose' | 'reorder'>('choose');
   const [reorderTokens, setReorderTokens] = useState<string[]>([]);
   const [reorderCount, setReorderCount] = useState<2 | 3>(2);
 
-  const stackInfo = getStackAtPosition(state);
+  const stackInfo = getMainStack(state);
   const moveAvailable = canMove(state);
   const reorderAvailable = canReorder(state);
+  const maxMovable = getMaxMovable(state);
 
   const handleMove = (count: 1 | 2 | 3) => {
     onAction({ type: 'move', count });
@@ -23,8 +24,6 @@ export function ActionPanel({ state, onAction }: ActionPanelProps) {
   };
 
   const startReorder = (count: 2 | 3) => {
-    if (!stackInfo) return;
-    const topTokens = stackInfo.tokens.slice(0, count);
     setReorderTokens([]);
     setReorderCount(count);
     setMode('reorder');
@@ -35,42 +34,42 @@ export function ActionPanel({ state, onAction }: ActionPanelProps) {
       if (prev.includes(tokenId)) {
         return prev.filter(id => id !== tokenId);
       }
+      if (prev.length >= reorderCount) return prev;
       return [...prev, tokenId];
     });
   };
 
   const confirmReorder = () => {
-    if (!stackInfo) return;
-    const topTokens = stackInfo.tokens.slice(0, reorderCount);
-    // Remaining tokens that weren't selected yet
-    const remaining = topTokens.filter(id => !reorderTokens.includes(id));
-    const newOrder = [...reorderTokens, ...remaining];
-    onAction({ type: 'reorder', count: reorderCount, newOrder });
+    onAction({ type: 'reorder', count: reorderCount, newOrder: reorderTokens });
     setMode('choose');
     setReorderTokens([]);
   };
 
   if (state.phase !== 'playing') return null;
 
-  const maxMovable = stackInfo ? Math.min(3, stackInfo.tokens.length) : 0;
+  const currentPlayer = state.players[state.currentPlayerIndex];
 
   if (mode === 'choose') {
     return (
       <div className="tiki-card animate-slide-up">
-        <h3 className="font-display text-lg text-foreground mb-3">
-          {state.players[state.currentPlayerIndex].name}'s Turn
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4">Choose an action:</p>
-        <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: currentPlayer.color }} />
+          <h3 className="font-display text-lg text-foreground">{currentPlayer.name}'s Turn</h3>
+        </div>
+
+        <div className="space-y-4">
+          {/* Move actions */}
           {moveAvailable && (
             <div>
-              <p className="text-sm font-bold text-foreground mb-2">Move Top Tokens Forward</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                ➡️ Move Forward
+              </p>
               <div className="flex gap-2">
-                {[1, 2, 3].filter(n => n <= maxMovable).map(n => (
+                {([1, 2, 3] as const).filter(n => n <= maxMovable).map(n => (
                   <button
                     key={n}
-                    onClick={() => handleMove(n as 1 | 2 | 3)}
-                    className="tiki-btn text-sm px-4 py-2"
+                    onClick={() => handleMove(n)}
+                    className="tiki-btn text-sm px-5 py-2.5"
                   >
                     Move {n}
                   </button>
@@ -78,23 +77,21 @@ export function ActionPanel({ state, onAction }: ActionPanelProps) {
               </div>
             </div>
           )}
+
+          {/* Reorder actions */}
           {reorderAvailable && (
             <div>
-              <p className="text-sm font-bold text-foreground mb-2">Reorder Top Tokens</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                🔀 Reorder Stack
+              </p>
               <div className="flex gap-2">
                 {stackInfo && stackInfo.tokens.length >= 2 && (
-                  <button
-                    onClick={() => startReorder(2)}
-                    className="tiki-btn tiki-btn-secondary text-sm px-4 py-2"
-                  >
+                  <button onClick={() => startReorder(2)} className="tiki-btn tiki-btn-secondary text-sm px-5 py-2.5">
                     Reorder 2
                   </button>
                 )}
                 {stackInfo && stackInfo.tokens.length >= 3 && (
-                  <button
-                    onClick={() => startReorder(3)}
-                    className="tiki-btn tiki-btn-secondary text-sm px-4 py-2"
-                  >
+                  <button onClick={() => startReorder(3)} className="tiki-btn tiki-btn-secondary text-sm px-5 py-2.5">
                     Reorder 3
                   </button>
                 )}
@@ -106,47 +103,49 @@ export function ActionPanel({ state, onAction }: ActionPanelProps) {
     );
   }
 
+  // Reorder mode
   if (mode === 'reorder' && stackInfo) {
     const topTokens = stackInfo.tokens.slice(0, reorderCount);
     return (
       <div className="tiki-card animate-slide-up">
-        <h3 className="font-display text-lg text-foreground mb-2">Reorder Tokens</h3>
-        <p className="text-sm text-muted-foreground mb-3">
-          Tap tokens in the order you want (top → bottom):
+        <h3 className="font-display text-lg text-foreground mb-1">Reorder Tokens</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Tap tokens in order you want them (1st tap = top of stack)
         </p>
-        <div className="flex gap-2 mb-3">
-          {topTokens.map((tokenId) => {
+
+        <div className="flex gap-3 mb-4 justify-center">
+          {topTokens.map(tokenId => {
             const orderIdx = reorderTokens.indexOf(tokenId);
             return (
-              <div key={tokenId} className="relative">
-                <TikiToken
-                  token={state.tokens[tokenId]}
-                  size="lg"
-                  selected={orderIdx >= 0}
-                  onClick={() => toggleReorderToken(tokenId)}
-                />
-                {orderIdx >= 0 && (
-                  <span className="absolute -top-2 -right-2 bg-secondary text-secondary-foreground w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
-                    {orderIdx + 1}
-                  </span>
-                )}
-              </div>
+              <TikiToken
+                key={tokenId}
+                token={state.tokens[tokenId]}
+                size="lg"
+                selected={orderIdx >= 0}
+                onClick={() => toggleReorderToken(tokenId)}
+                orderNumber={orderIdx >= 0 ? orderIdx + 1 : undefined}
+              />
             );
           })}
         </div>
+
         {reorderTokens.length > 0 && (
-          <p className="text-xs text-muted-foreground mb-3">
-            New order: {reorderTokens.map((id, i) => `${i + 1}. ${state.tokens[id].label}`).join(' → ')}
+          <p className="text-xs text-muted-foreground text-center mb-3">
+            New order: {reorderTokens.map((id, i) => `${i + 1}. ${state.tokens[id].emoji}`).join('  ')}
           </p>
         )}
-        <div className="flex gap-2">
-          <button onClick={confirmReorder} className="tiki-btn text-sm px-4 py-2"
-            disabled={reorderTokens.length !== reorderCount}>
-            Confirm
+
+        <div className="flex gap-2 justify-center">
+          <button
+            onClick={confirmReorder}
+            className="tiki-btn text-sm px-6 py-2"
+            disabled={reorderTokens.length !== reorderCount}
+          >
+            Confirm ✓
           </button>
           <button
             onClick={() => { setMode('choose'); setReorderTokens([]); }}
-            className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors"
+            className="px-4 py-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors rounded-xl bg-muted"
           >
             Cancel
           </button>

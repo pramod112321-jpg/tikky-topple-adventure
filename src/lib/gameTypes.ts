@@ -2,7 +2,8 @@ export interface Token {
   id: string;
   color: string;
   label: string;
-  ownerId: number; // player index
+  emoji: string;
+  ownerId: number;
 }
 
 export interface Player {
@@ -10,45 +11,53 @@ export interface Player {
   name: string;
   tokenIds: string[];
   score: number;
+  color: string;
 }
 
 export type ActionType = 'move' | 'reorder';
 
 export interface MoveAction {
   type: 'move';
-  count: 1 | 2 | 3; // move top 1, 2, or 3 tokens forward
+  count: 1 | 2 | 3;
 }
 
 export interface ReorderAction {
   type: 'reorder';
-  count: 2 | 3; // reorder top 2 or 3 tokens
-  newOrder: string[]; // token IDs in new order (top to bottom)
+  count: 2 | 3;
+  newOrder: string[];
 }
 
 export type GameAction = MoveAction | ReorderAction;
 
 export interface GameState {
   players: Player[];
-  stack: string[]; // token IDs from top to bottom
-  track: string[][]; // track positions, each position can hold tokens
+  track: string[][]; // track[position] = array of token IDs (top to bottom in stack)
   trackLength: number;
   currentPlayerIndex: number;
   turnNumber: number;
   maxTurns: number;
-  phase: 'setup' | 'playing' | 'ended';
+  phase: 'playing' | 'ended';
   tokens: Record<string, Token>;
   lastAction: string | null;
+  history: string[];
 }
 
-export const TOKEN_COLORS = [
-  { color: 'hsl(16, 80%, 50%)', label: '🔥' },   // orange
-  { color: 'hsl(200, 70%, 50%)', label: '🌊' },   // blue
-  { color: 'hsl(160, 60%, 40%)', label: '🌿' },   // green
-  { color: 'hsl(45, 90%, 55%)', label: '⭐' },    // yellow
-  { color: 'hsl(0, 75%, 55%)', label: '🌺' },     // red
-  { color: 'hsl(280, 60%, 55%)', label: '🔮' },   // purple
-  { color: 'hsl(330, 70%, 60%)', label: '🌸' },   // pink
-  { color: 'hsl(180, 60%, 45%)', label: '💎' },   // teal
+export const TOKEN_CONFIGS = [
+  { color: 'hsl(16, 80%, 50%)', emoji: '🔥', label: 'Fire' },
+  { color: 'hsl(200, 70%, 50%)', emoji: '🌊', label: 'Wave' },
+  { color: 'hsl(160, 60%, 40%)', emoji: '🌿', label: 'Leaf' },
+  { color: 'hsl(45, 90%, 55%)', emoji: '⭐', label: 'Star' },
+  { color: 'hsl(0, 75%, 55%)', emoji: '🌺', label: 'Hibiscus' },
+  { color: 'hsl(280, 60%, 55%)', emoji: '🔮', label: 'Crystal' },
+  { color: 'hsl(330, 70%, 60%)', emoji: '🌸', label: 'Blossom' },
+  { color: 'hsl(180, 60%, 45%)', emoji: '💎', label: 'Gem' },
 ];
 
-export const PLAYER_NAMES = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+export const PLAYER_COLORS = [
+  'hsl(16, 80%, 50%)',   // orange
+  'hsl(200, 70%, 50%)',  // blue
+  'hsl(160, 60%, 40%)',  // green
+  'hsl(280, 60%, 55%)',  // purple
+];
+
+export type AppScreen = 'home' | 'setup' | 'rules' | 'playing' | 'ended';
