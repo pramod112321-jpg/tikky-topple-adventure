@@ -6,6 +6,7 @@ import { SetupScreen } from '@/components/SetupScreen';
 import { RulesScreen } from '@/components/RulesScreen';
 import { GamePlayScreen } from '@/components/GamePlayScreen';
 import { GameOverScreen } from '@/components/GameOverScreen';
+import tikiBg from '@/assets/tiki-bg.jpg';
 
 const Index = () => {
   const [screen, setScreen] = useState<AppScreen>('home');
@@ -23,7 +24,6 @@ const Index = () => {
       if (!prev) return null;
       const newState = executeAction(prev, action);
       if (newState.phase === 'ended') {
-        // Small delay to show last action before transitioning
         setTimeout(() => setScreen('ended'), 600);
       }
       return newState;
@@ -40,29 +40,38 @@ const Index = () => {
     setScreen('home');
   }, []);
 
-  switch (screen) {
-    case 'home':
-      return (
-        <HomeScreen
-          onPlay={() => setScreen('setup')}
-          onRules={() => setScreen('rules')}
-        />
-      );
-    case 'setup':
-      return <SetupScreen onStart={handleStartGame} onBack={goHome} />;
-    case 'rules':
-      return <RulesScreen onBack={goHome} />;
-    case 'playing':
-      return gameState ? (
-        <GamePlayScreen state={gameState} onAction={handleAction} onQuit={goHome} />
-      ) : null;
-    case 'ended':
-      return gameState ? (
-        <GameOverScreen state={gameState} onPlayAgain={handlePlayAgain} onHome={goHome} />
-      ) : null;
-    default:
-      return null;
-  }
+  const content = (() => {
+    switch (screen) {
+      case 'home':
+        return <HomeScreen onPlay={() => setScreen('setup')} onRules={() => setScreen('rules')} />;
+      case 'setup':
+        return <SetupScreen onStart={handleStartGame} onBack={goHome} />;
+      case 'rules':
+        return <RulesScreen onBack={goHome} />;
+      case 'playing':
+        return gameState ? <GamePlayScreen state={gameState} onAction={handleAction} onQuit={goHome} /> : null;
+      case 'ended':
+        return gameState ? <GameOverScreen state={gameState} onPlayAgain={handlePlayAgain} onHome={goHome} /> : null;
+      default:
+        return null;
+    }
+  })();
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: `url(${tikiBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      <div className="min-h-screen" style={{ backgroundColor: 'hsla(25, 30%, 10%, 0.25)' }}>
+        {content}
+      </div>
+    </div>
+  );
 };
 
 export default Index;
