@@ -67,7 +67,7 @@ const Index = () => {
         backgroundAttachment: 'fixed',
       }}
     >
-      <div className="min-h-screen" style={{ backgroundColor: 'hsla(25, 30%, 10%, 0.45)', backdropFilter: 'blur(2px)' }}>
+      <div className="min-h-screen" style={{ backgroundColor: 'hsla(25, 30%, 10%, 0.25)' }}>
         {content}
       </div>
     </div>
