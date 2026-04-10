@@ -130,8 +130,10 @@ function StoneCell({
       {/* Tokens at this position */}
       {hasTokens && (
         <div className="flex gap-0.5 flex-wrap">
-          {tokens.slice(0, 3).map((tokenId) => (
-            <TikiToken key={tokenId} token={state.tokens[tokenId]} size="sm" />
+          {tokens.slice(0, 3).map((tokenId, i) => (
+            <div key={tokenId} className="animate-token-move-up" style={{ animationDelay: `${i * 0.1}s` }}>
+              <TikiToken token={state.tokens[tokenId]} size="sm" />
+            </div>
           ))}
           {tokens.length > 3 && (
             <span className="text-[10px] font-bold text-tiki-wood self-center">+{tokens.length - 3}</span>

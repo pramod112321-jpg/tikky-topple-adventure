@@ -17,12 +17,13 @@ export function GameTrack({ state }: GameTrackProps) {
               {/* Stacked tokens at this position */}
               <div className="flex flex-col gap-1 min-h-[48px] justify-end">
                 {[...tokensAtPos].reverse().map((tokenId, stackIdx) => (
-                  <TikiToken
-                    key={tokenId}
-                    token={state.tokens[tokenId]}
-                    size="sm"
-                    index={stackIdx}
-                  />
+                  <div key={tokenId} className="animate-token-move-up" style={{ animationDelay: `${stackIdx * 0.1}s` }}>
+                    <TikiToken
+                      token={state.tokens[tokenId]}
+                      size="sm"
+                      index={stackIdx}
+                    />
+                  </div>
                 ))}
               </div>
               {/* Track cell - wooden board style */}
