@@ -7,12 +7,12 @@ interface DiceRollerProps {
 }
 
 const diceFaces: Record<number, string> = {
-  1: '⚀',
-  2: '⚁',
-  3: '⚂',
+  1: '🔥',
+  2: '🔥🔥',
+  3: '🔥🔥🔥',
 };
 
-const TIKI_FACES = ['🗿', '🌺', '🔥', '🌴', '✨', '💎'];
+const TIKI_FACES = ['🗿', '🌋', '🔥', '🌴', '🏺', '☀️'];
 
 export function DiceRoller({ onRoll, disabled }: DiceRollerProps) {
   const [rolling, setRolling] = useState(false);
