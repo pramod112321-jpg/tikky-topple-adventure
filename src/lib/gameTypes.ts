@@ -43,14 +43,14 @@ export interface GameState {
 }
 
 export const TOKEN_CONFIGS = [
-  { color: 'hsl(16, 80%, 50%)', emoji: '🔥', label: 'Fire' },
+  { color: 'hsl(16, 80%, 50%)', emoji: '🔥', label: 'Flame' },
   { color: 'hsl(200, 70%, 50%)', emoji: '🌊', label: 'Wave' },
-  { color: 'hsl(160, 60%, 40%)', emoji: '🌿', label: 'Leaf' },
-  { color: 'hsl(45, 90%, 55%)', emoji: '⭐', label: 'Star' },
+  { color: 'hsl(160, 60%, 40%)', emoji: '🌴', label: 'Palm' },
+  { color: 'hsl(45, 90%, 55%)', emoji: '☀️', label: 'Sun' },
   { color: 'hsl(0, 75%, 55%)', emoji: '🌺', label: 'Hibiscus' },
-  { color: 'hsl(280, 60%, 55%)', emoji: '🔮', label: 'Crystal' },
-  { color: 'hsl(330, 70%, 60%)', emoji: '🌸', label: 'Blossom' },
-  { color: 'hsl(180, 60%, 45%)', emoji: '💎', label: 'Gem' },
+  { color: 'hsl(280, 60%, 55%)', emoji: '🗿', label: 'Tiki' },
+  { color: 'hsl(330, 70%, 60%)', emoji: '🌋', label: 'Volcano' },
+  { color: 'hsl(180, 60%, 45%)', emoji: '🏺', label: 'Totem' },
 ];
 
 export const PLAYER_COLORS = [

@@ -7,12 +7,12 @@ interface DiceRollerProps {
 }
 
 const diceFaces: Record<number, string> = {
-  1: '⚀',
-  2: '⚁',
-  3: '⚂',
+  1: '🔥',
+  2: '🔥🔥',
+  3: '🔥🔥🔥',
 };
 
-const TIKI_FACES = ['🗿', '🌺', '🔥', '🌴', '✨', '💎'];
+const TIKI_FACES = ['🗿', '🌋', '🔥', '🌴', '🏺', '☀️'];
 
 export function DiceRoller({ onRoll, disabled }: DiceRollerProps) {
   const [rolling, setRolling] = useState(false);
@@ -57,18 +57,20 @@ export function DiceRoller({ onRoll, disabled }: DiceRollerProps) {
         title="Roll the dice!"
       >
         <div
-          className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl font-display border-4 transition-all duration-200 ${
+          className={`w-20 h-20 rounded-2xl flex items-center justify-center font-display border-4 transition-all duration-200 ${
             rolling ? 'animate-tiki-shake' : finalValue ? 'animate-tiki-pop' : 'hover:scale-110'
           } ${rolling ? 'animate-tiki-glow' : ''}`}
           style={{
-            background: 'linear-gradient(145deg, hsl(35, 50%, 95%) 0%, hsl(35, 40%, 82%) 100%)',
-            borderColor: 'hsl(var(--tiki-wood-light))',
+            background: rolling
+              ? 'linear-gradient(145deg, hsl(16, 80%, 55%) 0%, hsl(35, 70%, 40%) 100%)'
+              : 'linear-gradient(145deg, hsl(35, 50%, 95%) 0%, hsl(35, 40%, 82%) 100%)',
+            borderColor: rolling ? 'hsl(45, 90%, 55%)' : 'hsl(var(--tiki-wood-light))',
             boxShadow: rolling
-              ? '0 2px 8px rgba(0,0,0,0.3), 0 0 20px hsl(45, 90%, 55%, 0.4)'
+              ? '0 2px 8px rgba(0,0,0,0.3), 0 0 24px hsl(45, 90%, 55%, 0.5), 0 0 48px hsl(16, 80%, 50%, 0.3)'
               : '0 6px 16px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.5)',
           }}
         >
-          <span className={rolling ? 'animate-spin-fast' : ''}>
+          <span className={`text-xl ${rolling ? 'animate-spin-fast' : 'drop-shadow-lg'}`}>
             {rolling && showTikiFace ? showTikiFace : diceFaces[currentFace]}
           </span>
         </div>
