@@ -6,10 +6,11 @@ import { SetupScreen } from '@/components/SetupScreen';
 import { RulesScreen } from '@/components/RulesScreen';
 import { GamePlayScreen } from '@/components/GamePlayScreen';
 import { GameOverScreen } from '@/components/GameOverScreen';
+import { IntroAnimation } from '@/components/IntroAnimation';
 import tikiBg from '@/assets/tiki-bg.jpg';
 
 const Index = () => {
-  const [screen, setScreen] = useState<AppScreen>('home');
+  const [screen, setScreen] = useState<AppScreen | 'intro'>('intro');
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [lastPlayerNames, setLastPlayerNames] = useState<string[]>([]);
 
@@ -42,6 +43,8 @@ const Index = () => {
 
   const content = (() => {
     switch (screen) {
+      case 'intro':
+        return <IntroAnimation onComplete={() => setScreen('home')} />;
       case 'home':
         return <HomeScreen onPlay={() => setScreen('setup')} onRules={() => setScreen('rules')} />;
       case 'setup':
