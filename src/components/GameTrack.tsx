@@ -25,17 +25,36 @@ export function GameTrack({ state }: GameTrackProps) {
                   />
                 ))}
               </div>
-              {/* Track cell label */}
+              {/* Track cell - wooden board style */}
               <div
-                className={`w-12 h-7 rounded-md flex items-center justify-center text-xs font-bold transition-all duration-200 border-2 ${
+                className={`w-12 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all duration-200 border-2 relative ${
                   isFinish
-                    ? 'bg-secondary/40 border-secondary text-secondary-foreground'
+                    ? 'border-secondary'
                     : hasTokens
-                    ? 'bg-primary/10 border-primary/30 text-foreground'
-                    : 'bg-muted/60 border-border text-muted-foreground'
+                    ? 'border-primary/40'
+                    : 'border-tiki-wood-light/60'
                 }`}
+                style={{
+                  background: isFinish
+                    ? 'linear-gradient(135deg, hsl(45, 90%, 55%) 0%, hsl(45, 80%, 45%) 100%)'
+                    : hasTokens
+                    ? 'linear-gradient(135deg, hsl(25, 40%, 30%) 0%, hsl(25, 35%, 22%) 100%)'
+                    : 'linear-gradient(135deg, hsl(25, 30%, 25%) 0%, hsl(25, 25%, 18%) 100%)',
+                  boxShadow: hasTokens
+                    ? '0 2px 8px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.1)'
+                    : 'inset 0 1px 3px rgba(0,0,0,0.2)',
+                }}
               >
-                {isFinish ? '🏁' : posIndex}
+                {/* Wood grain effect */}
+                <div
+                  className="absolute inset-0 rounded-md opacity-10 pointer-events-none"
+                  style={{
+                    background: 'repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(255,255,255,0.1) 3px, rgba(255,255,255,0.1) 4px)',
+                  }}
+                />
+                <span className={`relative z-10 ${isFinish ? 'text-foreground' : hasTokens ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
+                  {isFinish ? '🏁' : posIndex}
+                </span>
               </div>
             </div>
           );

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { GameState, GameAction } from '@/lib/gameTypes';
 import { canMove, canReorder, getMainStack, getMaxMovable } from '@/lib/gameEngine';
 import { TikiToken } from './TikiToken';
+import { DiceRoller } from './DiceRoller';
 
 interface ActionPanelProps {
   state: GameState;
@@ -61,19 +62,28 @@ export function ActionPanel({ state, onAction }: ActionPanelProps) {
           {/* Move actions */}
           {moveAvailable && (
             <div>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                ➡️ Move Forward
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">
+                🎲 Roll or Choose Move
               </p>
-              <div className="flex gap-2">
-                {([1, 2, 3] as const).filter(n => n <= maxMovable).map(n => (
-                  <button
-                    key={n}
-                    onClick={() => handleMove(n)}
-                    className="tiki-btn text-sm px-5 py-2.5"
-                  >
-                    Move {n}
-                  </button>
-                ))}
+              <div className="flex items-center gap-4">
+                <DiceRoller
+                  onRoll={(value) => {
+                    const clamped = Math.min(value, maxMovable) as 1 | 2 | 3;
+                    handleMove(clamped);
+                  }}
+                />
+                <div className="h-10 w-px bg-border" />
+                <div className="flex gap-2">
+                  {([1, 2, 3] as const).filter(n => n <= maxMovable).map(n => (
+                    <button
+                      key={n}
+                      onClick={() => handleMove(n)}
+                      className="tiki-btn text-sm px-5 py-2.5"
+                    >
+                      +{n}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
