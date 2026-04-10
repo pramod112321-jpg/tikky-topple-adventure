@@ -130,8 +130,10 @@ function StoneCell({
       {/* Tokens at this position */}
       {hasTokens && (
         <div className="flex gap-0.5 flex-wrap">
-          {tokens.slice(0, 3).map((tokenId) => (
-            <TikiToken key={tokenId} token={state.tokens[tokenId]} size="sm" />
+          {tokens.slice(0, 3).map((tokenId, i) => (
+            <div key={tokenId} className="animate-token-move-up" style={{ animationDelay: `${i * 0.1}s` }}>
+              <TikiToken token={state.tokens[tokenId]} size="sm" />
+            </div>
           ))}
           {tokens.length > 3 && (
             <span className="text-[10px] font-bold text-tiki-wood self-center">+{tokens.length - 3}</span>
@@ -166,16 +168,16 @@ function TikiTotemStack({ state }: { state: GameState }) {
           return (
             <div
               key={tokenId}
-              className="relative w-16 h-14 flex items-center justify-center overflow-hidden"
+              className="relative w-16 h-14 flex items-center justify-center overflow-hidden animate-token-move-up"
               style={{
                 background: `linear-gradient(180deg, ${token.color} 0%, ${token.color}cc 100%)`,
                 borderBottom: idx < tokenIds.length - 1 ? '1px solid rgba(0,0,0,0.25)' : 'none',
+                animationDelay: `${idx * 0.08}s`,
               }}
             >
               {/* Tiki face pattern overlay */}
               <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
                 <svg viewBox="0 0 40 40" width="36" height="36" fill="none" stroke="currentColor" strokeWidth="2" className="text-foreground">
-                  {/* Simple tiki face */}
                   <circle cx="14" cy="14" r="4" />
                   <circle cx="26" cy="14" r="4" />
                   <rect x="12" y="24" width="16" height="8" rx="2" />
