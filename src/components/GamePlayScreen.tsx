@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { GameState, GameAction } from '@/lib/gameTypes';
-import { createGame, executeAction } from '@/lib/gameEngine';
-import { GameTrack } from '@/components/GameTrack';
+import { GameBoard } from '@/components/GameBoard';
 import { PlayerPanel } from '@/components/PlayerPanel';
 import { ActionPanel } from '@/components/ActionPanel';
 
@@ -15,9 +14,9 @@ export function GamePlayScreen({ state, onAction, onQuit }: GamePlayScreenProps)
   const progressPercent = Math.min(100, ((state.turnNumber - 1) / state.maxTurns) * 100);
 
   return (
-    <div className="min-h-screen flex flex-col p-3 md:p-4 max-w-5xl mx-auto">
+    <div className="min-h-screen flex flex-col p-3 md:p-4 max-w-6xl mx-auto">
       {/* Header bar */}
-      <div className="flex items-center justify-between mb-3 bg-card rounded-xl px-4 py-2.5 shadow-sm border-2 border-border">
+      <div className="flex items-center justify-between mb-3 bg-card/90 rounded-xl px-4 py-2.5 shadow-sm border-2 border-border backdrop-blur-sm">
         <h1 className="font-display text-xl text-primary">Tiki Topple</h1>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -26,7 +25,6 @@ export function GamePlayScreen({ state, onAction, onQuit }: GamePlayScreenProps)
               {state.turnNumber}/{state.maxTurns}
             </span>
           </div>
-          {/* Progress bar */}
           <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-300"
@@ -44,31 +42,23 @@ export function GamePlayScreen({ state, onAction, onQuit }: GamePlayScreenProps)
 
       {/* Last action feedback */}
       {state.lastAction && (
-        <div className="text-sm text-accent font-bold mb-2 px-2 animate-slide-up">
+        <div className="text-sm text-accent font-bold mb-2 px-2 animate-slide-up text-center">
           ↪ {state.lastAction}
         </div>
       )}
 
-      {/* Game Track */}
-      <div className="tiki-card mb-3 p-3">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider">
-            Game Track
-          </h3>
-          <span className="text-xs text-muted-foreground">Position 0 → {state.trackLength - 1} 🏁</span>
-        </div>
-        <GameTrack state={state} />
-      </div>
-
-      {/* Players + Actions */}
-      <div className="grid md:grid-cols-2 gap-3 flex-1">
-        <div>
-          <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
+      {/* Main layout: Board in center with panels on sides */}
+      <div className="flex flex-col lg:flex-row gap-3 flex-1 items-start">
+        {/* Left side: Players */}
+        <div className="w-full lg:w-48 order-2 lg:order-1">
+          <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1 text-center">
             Players
           </h3>
-          <PlayerPanel state={state} />
+          <div className="tiki-card p-3">
+            <PlayerPanel state={state} />
+          </div>
 
-          {/* Action history */}
+          {/* History */}
           {state.history.length > 0 && (
             <div className="mt-3 tiki-card p-3">
               <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2">
@@ -85,8 +75,14 @@ export function GamePlayScreen({ state, onAction, onQuit }: GamePlayScreenProps)
           )}
         </div>
 
-        <div>
-          <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
+        {/* Center: Game Board */}
+        <div className="flex-1 order-1 lg:order-2">
+          <GameBoard state={state} />
+        </div>
+
+        {/* Right side: Actions */}
+        <div className="w-full lg:w-64 order-3">
+          <h3 className="font-display text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1 text-center">
             Actions
           </h3>
           <ActionPanel state={state} onAction={onAction} />
